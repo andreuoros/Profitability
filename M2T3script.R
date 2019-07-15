@@ -73,16 +73,6 @@ a <- c("lm", "rf", "knn", "svmLinear", "gbm")
 
 compare.model <- c()
 
-for (i in a) {
-  
-  model <- caret::train(Volume ~., data = training, method = i, )
-  
-  pred <- predict(model, newdata = testing)
-  
-  pred.metric <- postResample(testing$Volume, obs = pred)
-  
-  compare.model <- cbind(pred.metric, compare.model)
-  
-}
+
 
 
