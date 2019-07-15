@@ -41,7 +41,6 @@ ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
 
 str(ExistProd2)
 
-ExistProd2$id <- NULL
 
 
 ##### Correlation Matrix ####
