@@ -85,8 +85,4 @@ for (i in a) {
   
 }
 
-compare.model <- compare.model[, seq(ncol(compare.model), 1, -1)]
 
-colnames(compare.model) <- a
-
-compare.model
