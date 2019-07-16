@@ -13,23 +13,9 @@ NewProd <- read_csv("newproductattributes2017.csv")
 
 summary(ExistProd)
 
-# dummify the data
-
-ExistProd$ProductType <- dummyVars(" ~ .", data = ExistProd$ProductType)
-
-readyData <- data.frame(predict(newDataFrame, newdata = ExistProd))
-
 #### Preprocessing data ####
 
-ExistProd <- mutate(ExistProd, id = rownames(ExistProd))
-
-duplicated(ExistProd)
-
-is.na(NewProd)
-
-sum(is.na(ExistProd))
-
-is.na(ExistProd)
+ExistProd$ProductNum <- NULL 
 
 ExistProd$BestSellersRank <- NULL
 
@@ -37,19 +23,55 @@ str(ExistProd$ProductType)
 
 ExistProd$ProductType <- as.factor(ExistProd$ProductType)
 
-ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
+ExistProd <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
 
-str(ExistProd2)
+NewProd$ProductType <- as.factor(NewProd$ProductType)
 
+NewProd <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 
+str(ExistProd)
+
+ExistProd$id <- NULL
+
+#### Normalization ####
+
+for (i in c(2:15)){
+  ExistProd[,i] <- scale(ExistProd[,i])
+}
+
+for (i in c(2:11)){
+  NewProd[,i] <- scale(NewProd[,i])
+}
+
+#### Outliers ####
+
+install.packages("AnomalyDetection")
+library(AnomalyDetection)
+res = AnomalyDetectionTs(ExistProd2, max, direction='both', plot=TRUE)
+res$plot
 
 ##### Correlation Matrix ####
 
+z <- ExistProd
 
-CorrelationMatrixEP2 <- cor(ExistProd2, y = NULL, use = "everything",
-                            method = "pearson")
+for (i in a) {
+  CM <- cor(i)
+  hc <- findCorrelation(CM, cutoff = 0.9)
+  hc <- sort(hc)
+  i <- i[, -c(hc)]
+}
 
-findCorrelation(CorrelationMatrixEP2, cutoff = 0.9, verbose = TRUE, names = TRUE)
+CorrelationMatrixEP <- cor(ExistProd)
+hc <- findCorrelation(CorrelationMatrixEP, cutoff = 0.9)
+hc <- sort(hc)
+ExistProd <- ExistProd[, -c(hc)]
+
+
+ExistProd$x3StarReviews <- NULL
+
+ExistProd$x5StarReviews <- NULL
+
+ExistProd$x2StarReviews <- NULL
 
 corrplot(CorrelationMatrixEP2, order="hclust",
          tl.col = "black", tl.srt = 90 , tl.cex = 0.5, tl.pos = "t")
@@ -89,3 +111,18 @@ compare.model <- compare.model[, seq(ncol(compare.model), 1, -1)]
 colnames(compare.model) <- a
 
 compare.model
+
+GBMmodel <- caret::train(Volume ~ ., data=training, method = "gbm", tuneLength = 2, trControl = ctrl)
+
+summary(GBMmodel)
+
+GBMmodel
+
+#### Predictions ####
+
+predictions <- predict(object = model, newdata =  NewProd2)
+
+summary(predictions)
+
+predictions
+
