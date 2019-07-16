@@ -15,9 +15,15 @@ summary(ExistProd)
 
 #### Preprocessing data ####
 
+sum(is.na(ExistProd))
+
+sum(is.na(NewProd))
+
 ExistProd$ProductNum <- NULL 
 
 ExistProd$BestSellersRank <- NULL
+
+NewProd$ProductNum <- NULL
 
 str(ExistProd$ProductType)
 
@@ -31,40 +37,25 @@ NewProd <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 
 str(ExistProd)
 
-ExistProd$id <- NULL
-
 #### Normalization ####
 
 for (i in c(2:15)){
   ExistProd[,i] <- scale(ExistProd[,i])
 }
 
-for (i in c(2:11)){
+for (i in c(2:15)){
   NewProd[,i] <- scale(NewProd[,i])
 }
 
 #### Outliers ####
 
-install.packages("AnomalyDetection")
-library(AnomalyDetection)
-res = AnomalyDetectionTs(ExistProd2, max, direction='both', plot=TRUE)
-res$plot
-
 ##### Correlation Matrix ####
 
-z <- ExistProd
+CM <- cor(ExistProd)
 
-for (i in a) {
-  CM <- cor(i)
-  hc <- findCorrelation(CM, cutoff = 0.9)
-  hc <- sort(hc)
-  i <- i[, -c(hc)]
-}
+x <- findCorrelation(CM, cutoff = 0.9, names = TRUE)
 
-CorrelationMatrixEP <- cor(ExistProd)
-hc <- findCorrelation(CorrelationMatrixEP, cutoff = 0.9)
-hc <- sort(hc)
-ExistProd <- ExistProd[, -c(hc)]
+ExistProd <- ExistProd[, - which(names(ExistProd) %in% x)]
 
 
 ExistProd$x3StarReviews <- NULL
@@ -112,3 +103,10 @@ summary(predictions)
 
 predictions
 
+#### ANOVA Test ####
+
+res.aov <- aov(Volume ~ ., data = ExistProd)
+
+summary(res.aov)
+ 
+TukeyHSD(res.aov)
