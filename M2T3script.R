@@ -94,23 +94,9 @@ a <- c("lm", "rf", "knn", "svmLinear", "gbm")
 
 compare.model <- c()
 
-for (i in a) {
-  
-  model <- caret::train(Volume ~., data = training, method = i, )
-  
-  pred <- predict(model, newdata = testing)
-  
-  pred.metric <- postResample(testing$Volume, obs = pred)
-  
-  compare.model <- cbind(pred.metric, compare.model)
-  
-}
 
-compare.model <- compare.model[, seq(ncol(compare.model), 1, -1)]
 
-colnames(compare.model) <- a
 
-compare.model
 
 GBMmodel <- caret::train(Volume ~ ., data=training, method = "gbm", tuneLength = 2, trControl = ctrl)
 
