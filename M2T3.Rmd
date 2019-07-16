@@ -1,0 +1,158 @@
+---
+title: "M2T3"
+author: "Sergi"
+date: "7/16/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Table of contents
+0. [Importing DFs and Libraries](#Importing DFs and Libraries)
+1. [Data Exploration and preprocessing](#DATA EXPLORATION AND PREPROCESSING)
+    1. [Dealing with repeated products](#Dealing with repeated products)
+    2. [Removing useless columns](#subparagraph2)
+    3. [Checking for outliers](#subparagraph3)
+2. [Feature Engineering](#paragraph2)
+3. [Predictive Models](#paragraph3)
+4. [Analyzing and Plotting Errors](#paragraph4)
+5. [Final Predictions](#paragraph5)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 0.IMPORTING DFs AND LIBRARIES
+```{r}
+
+ExistProd <- read.csv("existingproductattributes2017.csv")
+NewProd   <- read.csv("newproductattributes2017.csv")
+
+
+library(pacman)
+p_load(rstudioapi,ggplot2,dplyr,Metrics,caret,caTools,mlbench,C50,inum,doSNOW,mgsub,stringr,zoo,textclean,tictoc,corrplot,mlr,party,reshape,e1071,recipes)
+```
+## 1.DATA EXPLORATION AND PREPROCESSING
+## 1.1.Dealing with repeated products
+```{r}
+#Because we have worked with these products before, and because the dataset is small, we can observe duplicates just by looking at the df itself. We find out all 'ExtendedWarranty' products share the same values in everything (including exact number of reviews of all types) except for a small different in price. In a business sense, We conclude this is because warranties are sold alongside different products, only the same type of warranty is included, but will vary in price proportionally to the price itself. We should treat them as the same products and remove all but one.
+
+#Showing the 6 duplicates
+sum(duplicated(ExistProd[,c(1,4:18)]))
+#Removing them:
+ExistProd <- ExistProd[-c(35:41),]
+```
+## 1.2.Removing useless columns
+```{r}
+#We checked in the previous project that some columns were not useful and just added noise to our prediction model. The columns are:
+#1. Product dimensions (width, Depth and Height)
+#2. Best Sellers Rank
+#3. Shipping Weight
+#4. Product Num (we don't want the id to add 'noise')
+
+#We proceed to get rid of the aforementioned columns in both df (they need to be the same for prediction)
+ExistProd <- ExistProd[,-c(2,12:16)]
+NewProd   <- NewProd[,-c(2,12:16)]
+```
+## 1.3.Checking for outliers
+```{r}
+#We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove them.
+ggplot(stack(ExistProd), aes(x=ind, y=values)) +geom_boxplot()
+```
+## 1.4.Scaling values
+```{r}
+#Since different variables have different units, we are going to scale all numeric variables (except label):
+for (i in c(2:11)){ExistProd[,i] <- scale(ExistProd[,i])}
+
+#We do the same in NewProd df
+for (i in c(2:11)){NewProd[,i] <- scale(NewProd[,i])}
+```
+## 2. FEATURE ENGINEERING
+## 2.1.Dealing with non-numeric features (Dummifying)
+```{r}
+#We are going to dummify(turn categorical values into logical ones)
+#We need to dummify Product Type only. We check if it's a factor first
+str(ExistProd$ProductType)
+
+#The Correlation Matrix is only going to work with numeric values, so we create another df as to avoid messing with the current one, so that we can run a correlation matrix. We do this before dummifying, because once we dummify we'll have lots of variables and the correlation matrix will be way harder to read.
+ExistProd_corr <- ExistProd[,-c(1)]
+
+CorrData2 <- cor(ExistProd_corr)
+corrplot(CorrData2, order="hclust", method = "number",
+        tl.col = "black", tl.srt = 90 , tl.cex = 0.5, tl.pos = "t")
+
+#We dummify and add the new columns into a new dataset so we can run correlation matrix
+ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
+NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
+```
+## 2.2.Dealing with Collinearity
+```{r}
+#We now look for collinearity in the newly dummified df
+CorrData <- cor(ExistProd2)
+findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
+
+#The above function recommends what columns we should erase based on collinearity. So we proceed to do that:
+ExistProd2[ ,c(2,4,5)] <- list(NULL)
+NewProd2[ ,c(2,4,5)]   <- list(NULL)
+```
+## 3. Predictive Models
+```{r}
+set.seed(107)
+
+inTrain  <- createDataPartition(ExistProd2$Volume,p = 0.75, list = FALSE)
+training <- ExistProd2[inTrain,]
+testing  <- ExistProd2[-inTrain,]
+ctrl     <- trainControl(method = "cv", number = 10)
+
+nrow(training)
+nrow(testing)
+
+#The chosen models are looped below
+Five_Models   <- c("lm", "rf", "knn", "svmLinear", "gbm")
+
+#We create an empty variable so we can later assign all results to it
+compare.model <- c()
+
+#We run all models at once and assign the results in 'compare.model'.
+#However, now the loop is overwriting each model as it goes through them, so it will only keep the last one saved.
+for (i in Five_Models){
+  model         <- caret::train(Volume ~., data = training, method = i, )
+  pred          <- predict(model, newdata = testing)
+  pred.metric   <- postResample(testing$Volume, obs = pred)
+  compare.model <- cbind(pred.metric, compare.model)
+}
+
+#That's why we create a list with all models so that we can later choose the model
+methods <- list()
+
+#We will save them in the variable previously created
+for (i in Five_Models) {
+  methods[[i]] <- caret::train(Volume ~., data = training, method = i )
+}
+  
+methods
+
+colnames(compare.model) <- Five_Models
+compare.model
+```
+## 4.Analyzing and plotting errors
+```{r}
+compare.model.melt <- melt(compare.model, varnames = c("metric", "model"))
+compare.model.melt <- as.data.frame(compare.model.melt)
+compare.model.melt
+
+for(i in c("RMSE","Rsquared","MAE")) {
+  metric <-  compare.model.melt %>%  filter(metric == i)
+  gg     <- ggplot(metric, aes(model,value))
+  print(gg + geom_bar(stat = "identity") + ggtitle(i))
+}
+```
+## 5.Final Predictions
+```{r}
+predictions <- predict(methods$svmLinear, NewProd2)
+predictions
+
+NewProd2$predictions <- predictions
+```
+
+```{r}
+
+```
