@@ -50,12 +50,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load libraries
 install.packages("pacman")
 library(pacman)
-
-p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C50, party, reshape, dplyr, 
-       markdown, ggpubr, tidyr, hydroGOF, BBmisc, tidyverse, textclean, 
-       inum, doParallel, Hmisc, caretEnsemble, mboost, cluster, ade4, factoextra, asbio, SatMatch, FactoMineR, fpc,
-       e1071, randomForest, rstudioapi, MASS, ParamHelpers, mlr 
-)
+p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, cluster, ade4, factoextra, asbio, SatMatch, FactoMineR, fpc,e1071, randomForest, rstudioapi, MASS, ParamHelpers, mlr)
 
 # Enable parallel computing
 cl <- makePSOCKcluster(4)
@@ -65,8 +60,9 @@ registerDoParallel(cl)
 current_path = getActiveDocumentContext()$path
 setwd(dirname(current_path))
 
-ExistProd <- read.csv("existingproductattributes2017.csv")
-NewProd   <- read.csv("newproductattributes2017.csv")
+ExistProd   <- read.csv("existingproductattributes2017.csv")
+NewProd     <- read.csv("newproductattributes2017.csv")
+NewProd_Raw <- read.csv("newproductattributes2017.csv")
 ```
 ## 1.DATA EXPLORATION AND PREPROCESSING
 ## 1.1.Dealing with repeated products
@@ -77,12 +73,13 @@ NewProd   <- read.csv("newproductattributes2017.csv")
 #IMPORTANT NOTE: It's good practice to remove the columns by name instead of by column number, so that if we do changes in dataset later, and we reload these commands, we won't mess up unwanted columns.
 
 sum(duplicated(ExistProd[,c(1,4:18)]))
-#Removing them:
+#Removing them, but setting an average price for the remaining product of Warranty:
+#ExistProd <- ExistProd[-c(35:41),]
 Duplicates <- ExistProd[c(32:41),]
 Duplicates[3,3] <- sum(Duplicates[3:10,3])/8
 Duplicates <- Duplicates[1:3,]
-ExistProd <- ExistProd[-c(32:41),]
-ExistProd <- rbind(ExistProd, Duplicates)
+ExistProd  <- ExistProd[-c(32:41),]
+ExistProd  <- rbind(ExistProd, Duplicates)
 ```
 ## 1.2.Removing useless columns
 ```{r}
@@ -93,32 +90,25 @@ ExistProd <- rbind(ExistProd, Duplicates)
 #4. Product Num (we don't want the id to add 'noise')
 
 #We proceed to get rid of the aforementioned columns in both df (they don't need to be the same for prediction, but it's good practice)
-ExistProd <- ExistProd[,-which(names(ExistProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
 
+ExistProd <- dplyr::select(ExistProd,-c(ProductNum,BestSellersRank,ShippingWeight,ProductDepth, ProductWidth, ProductHeight))
 
-?filter
-ExistProd <- select(ExistProd,-c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))
-
-NewProd <- NewProd[,-which(names(NewProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
+NewProd  <- dplyr::select(NewProd,-c(ProductNum,BestSellersRank,ShippingWeight,ProductDepth, ProductWidth, ProductHeight))
 #BAD EXAMPLE: ExistProd <- ExistProd[,-c(2,12:16)]
             #NewProd    <- NewProd[,-c(2,12:16)]
 ```
 ## 1.3.Checking for outliers
 ```{r}
 #We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove all of them.
-ggplot(stack(ExistProd), aes(x=ind, y=values)) + geom_boxplot()
+ggplot(stack(ExistProd), aes(x=ind, y=values)) +geom_boxplot()
 
 #But we should look more in depth at least in the outliers of the dependent column
-ggplot(ExistProd, aes(x=ProductType, y=Volume)) + geom_boxplot()
+ggplot(ExistProd, aes(x=ProductType, y=Volume)) +geom_boxplot()
 
-#We have few outliers here as well. The R Built-in function will tell us the values
+#We have few outliers here as well. The R Built-in function will tell us the values.
 boxplot(ExistProd$Volume, plot = FALSE)$out
-
-
-outliers <- boxplot(cars$distance, plot = FALSE)$out
-
-cars <- cars[-which(cars$distance %in% outliers),]
-
+#But we only want to remove the two extreme outliers because our dataset is small, and because these outliers don't belong to the product types we want to predict.
+ExistProd <- ExistProd[-which(ExistProd$Volume > 7000),]
 ```
 ## 1.4.Scaling values
 ```{r}
@@ -140,36 +130,50 @@ ExistProd_corr <- ExistProd[,-c(1)]
 
 CorrData2 <- cor(ExistProd_corr)
 corrplot(CorrData2, order="hclust", method = "number",
-        tl.col = "black", tl.srt = 90 , tl.cex = 0.5, tl.pos = "t")
+        tl.col = "black", tl.srt = 90 , tl.cex = 0.7, tl.pos = "t")
 
-#We dummify and add the new columns into a new dataset so we can run correlation matrix
+#In order to find out the relationship between the label and the ProductType (categorical), we are going to use the ANOVA test.
+ANOVA <- aov(ExistProd$Volume~ ExistProd$ProductType)
+summary(ANOVA)
+#Since the p-value is higher than 0.05, we reject the Null Hypothesis, which states that both variables come from the same population. Therefore, it's not useful to use this variable to predict Volume.
+
+#Now we will confirm this with a Random Forest w/ dummyfeatures
 ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
 NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 
-#We trained a tree based model to assess the mportance of each feature regardings the prediction of volume
-mRF <- randomForest(Volume ~., ExistProd2, ntree = 80)
+set.seed(107)
+
+inTrain  <- createDataPartition(ExistProd2$Volume,p = 0.75, list = FALSE)
+training <- ExistProd2[inTrain,]
+testing  <- ExistProd2[-inTrain,]
+ctrl     <- trainControl(method = "cv", number = 10)
+
+
+mRF  <- randomForest(Volume ~., ExistProd2, ntree = 80)
 plot (mRF, main = "asd")
 ctrl <- trainControl(method="repeatedcv",repeats = 3, number = 5) #,classProbs=TRUE,summaryFunction = twoClassSummary)
-mRF2 <- train(Volume ~ ., data = trainS, method = "rf", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 2)
+mRF2 <- caret::train(Volume ~ ., data = training, method = "rf", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 2)
 
 varImpPlot(mRF)
 
+#As a conclusion, we get rid of Product Type
+ExistProd$ProductType <- NULL
+
+
+#ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
+#NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 ```
 ## 2.2.Dealing with Collinearity
 ```{r}
 #We now look for collinearity in the newly dummified df
-CorrData <- cor(ExistProd2)
+CorrData <- cor(ExistProd)
 CorNames <- findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
-ExistProd2 <- ExistProd2[, - which(names(ExistProd2) %in% CorNames)]
 #The above function recommends what columns we should erase based on collinearity. So we proceed to do that:
-#WORST EXAMPLE:
-#CM <- cor(ExistProd2)
-#x  <- findCorrelation(CM, cutoff = 0.9, names = TRUE)
-#ExistProd2 <- ExistProd2[, - which(names(ExistProd2) %in% x)
+ExistProd <- ExistProd[, - which(names(ExistProd) %in% CorNames)]
 
-
-ExistProd2[ ,c(2,4,5)] <- list(NULL)
-NewProd2[ ,c(2,4,5)]   <- list(NULL)
+#BAD PRACTICE
+#ExistProd[ ,c(2,4,5)] <- list(NULL)
+#NewProd[ ,c(2,4,5)]   <- list(NULL)
 ```
 ## 3. Predictive Models
 ```{r}
@@ -230,21 +234,16 @@ for(i in c("RMSE","Rsquared","MAE")) {
 predictions_svm <- predict(methods$svmLinear, NewProd2)
 predictions_svm
 
-#predictions from another model: RF(because of the highest R squared)
-predictions_rf <- predict(methods$svmLinear, NewProd2)
-predictions_rf
-
 #Adding our predictions to the test set
-NewProd$predictions_svm <- predictions_svm
-NewProd$predictions_rf  <- predictions_rf
-Prod_Sales_Pred         <- NewProd[,-c(2:12)]
-Prod_Sales_Pred         <- Prod_Sales_Pred[-c(10:11,16:24),]
+Prod_Sales_Pred                 <- NewProd_Raw[,-c(3:nrow(NewProd_Raw))]
+Prod_Sales_Pred$predictions_svm <- predictions_svm
+Prod_Sales_Pred                 <- Prod_Sales_Pred[-c(10:11,16:24),]
 
-#Adding id so we can plot it correctly
-Prod_Sales_Pred     <- mutate(Prod_Sales_Pred, id = rownames(Prod_Sales_Pred))
+
+Prod_Sales_Pred$ProductNum <- mgsub(x = Prod_Sales_Pred$ProductNum,pattern = c(171,172,173,175,176,178,180,181,183,193,194,195,196), replacement = c("Dell1","Dell2","Apple","Toshiba","Razer","hp","Acer","Asus","Samsung1","Motorola1","Samsung2","HTC","Motorola2"))
 
 #We can observe how sales vary among the different products
-ggplot(Prod_Sales_Pred, aes(x=id,y=predictions, fill=ProductType)) +geom_col()
+ggplot(Prod_Sales_Pred, aes(x=ProductNum,y=predictions_svm, fill=ProductType)) +geom_col()
 ```
 
 ```{r}
