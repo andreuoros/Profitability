@@ -21,20 +21,31 @@ NewProd <- read_csv("newproductattributes2017.csv")
 
 summary(ExistProd)
 
+<<<<<<< HEAD
 #### 1. Exploration ####
 
 #### 2. Preprocessing: Missing values & Duplicates ####
-
-ExistProd <- mutate(ExistProd, id = rownames(ExistProd))
-
-duplicated(ExistProd)
-
-is.na(NewProd)
+=======
+#### Preprocessing data ####
 
 sum(is.na(ExistProd))
 
-is.na(ExistProd)
+sum(is.na(NewProd))
 
+ExistProd$ProductNum <- NULL 
+>>>>>>> Andreu
+
+ExistProd$BestSellersRank <- NULL
+
+NewProd$ProductNum <- NULL
+
+str(ExistProd$ProductType)
+
+ExistProd$ProductType <- as.factor(ExistProd$ProductType)
+
+ExistProd <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
+
+<<<<<<< HEAD
 #Function to exclude certain columns defined in the null-vector
 null <- c("BestSellersRank", "ProductNum")
 
@@ -48,15 +59,21 @@ for (i in null) {
 # ExistProd$ProductType <- dummyVars(" ~ .", data = ExistProd$ProductType)
 
 # readyData <- data.frame(predict(newDataFrame, newdata = ExistProd))
+=======
+NewProd$ProductType <- as.factor(NewProd$ProductType)
+>>>>>>> Andreu
 
-str(ExistProd$ProductType)
+NewProd <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 
-ExistProd$ProductType <- as.factor(ExistProd$ProductType)
+str(ExistProd)
 
-ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
+#### Normalization ####
 
-str(ExistProd2)
+for (i in c(2:15)){
+  ExistProd[,i] <- scale(ExistProd[,i])
+}
 
+<<<<<<< HEAD
 
 #### 2. Preprocessing: Outliers ####
 
@@ -102,11 +119,28 @@ function_outliers <- function(features, data) {
 function_outliers(features, ExistProd2)
 
 #### 3. Selection/Engineering - Correlation Matrix ####
+=======
+for (i in c(2:15)){
+  NewProd[,i] <- scale(NewProd[,i])
+}
 
-CorrelationMatrixEP2 <- cor(ExistProd2, y = NULL, use = "everything",
-                            method = "pearson")
+#### Outliers ####
 
-findCorrelation(CorrelationMatrixEP2, cutoff = 0.9, verbose = TRUE, names = TRUE)
+##### Correlation Matrix ####
+
+CM <- cor(ExistProd)
+
+x <- findCorrelation(CM, cutoff = 0.9, names = TRUE)
+
+ExistProd <- ExistProd[, - which(names(ExistProd) %in% x)]
+>>>>>>> Andreu
+
+
+ExistProd$x3StarReviews <- NULL
+
+ExistProd$x5StarReviews <- NULL
+
+ExistProd$x2StarReviews <- NULL
 
 corrplot(CorrelationMatrixEP2, order="hclust",
          tl.col = "black", tl.srt = 90 , tl.cex = 0.5, tl.pos = "t")
@@ -151,3 +185,25 @@ compare.model <- c()
 
 
 
+
+GBMmodel <- caret::train(Volume ~ ., data=training, method = "gbm", tuneLength = 2, trControl = ctrl)
+
+summary(GBMmodel)
+
+GBMmodel
+
+#### Predictions ####
+
+predictions <- predict(object = model, newdata =  NewProd2)
+
+summary(predictions)
+
+predictions
+
+#### ANOVA Test ####
+
+res.aov <- aov(Volume ~ ., data = ExistProd)
+
+summary(res.aov)
+ 
+TukeyHSD(res.aov)

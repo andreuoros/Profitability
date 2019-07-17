@@ -72,7 +72,7 @@ ExistProd <- ExistProd[,-which(names(ExistProd) %in% c("Price","BestSellersRank"
 
 
 ?filter
-ExistProd <- select(ExistProd,-c(Price,BestSellersRank,ShippingWeight,ProductDepth,ProductWidth,ProductHeight))
+ExistProd <- select(ExistProd,-c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))
 
 NewProd <- NewProd[,-which(names(NewProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
 #BAD EXAMPLE: ExistProd <- ExistProd[,-c(2,12:16)]
@@ -125,8 +125,8 @@ NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
 ```{r}
 #We now look for collinearity in the newly dummified df
 CorrData <- cor(ExistProd2)
-findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
-
+CorNames <- findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
+ExistProd2 <- ExistProd2[, - which(names(ExistProd2) %in% CorNames)]
 #The above function recommends what columns we should erase based on collinearity. So we proceed to do that:
 #WORST EXAMPLE:
 #CM <- cor(ExistProd2)
