@@ -23,7 +23,7 @@ In particular, correlation Matrix, Random Forest and ANOVA test are applied to a
 
 > The predicted sales volume is ordered from highest to lowest sales volume in Table 1.  
   
-> Table1: Pred. Volume and profit by brand  
+> Table 1: Pred. Volume and profit by brand  
   
 Product Type | Brand    | Pred. Volume  | Profit (in k$)
 ------------ | -------  | ------------- | --------------  
