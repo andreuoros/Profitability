@@ -22,13 +22,26 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ## 0.IMPORTING DFs AND LIBRARIES
 ```{r}
+# Load libraries
+install.packages("pacman")
+library(pacman)
+
+p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C50, party, reshape, dplyr, 
+       markdown, ggpubr, tidyr, hydroGOF, BBmisc, tidyverse, textclean, 
+       inum, doParallel, Hmisc, caretEnsemble, mboost, cluster, ade4, factoextra, asbio, SatMatch, FactoMineR, fpc,
+       e1071, randomForest, rstudioapi, MASS, ParamHelpers, mlr 
+)
+
+# Enable parallel computing
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+
+# Loading dataset(s)
+current_path = getActiveDocumentContext()$path
+setwd(dirname(current_path))
 
 ExistProd <- read.csv("existingproductattributes2017.csv")
 NewProd   <- read.csv("newproductattributes2017.csv")
-
-
-library(pacman)
-p_load(rstudioapi,ggplot2,dplyr,Metrics,caret,caTools,mlbench,C50,inum,doSNOW,mgsub,stringr,zoo,textclean,tictoc,corrplot,mlr,party,reshape,e1071,recipes)
 ```
 ## 1.DATA EXPLORATION AND PREPROCESSING
 ## 1.1.Dealing with repeated products
@@ -40,7 +53,11 @@ p_load(rstudioapi,ggplot2,dplyr,Metrics,caret,caTools,mlbench,C50,inum,doSNOW,mg
 
 sum(duplicated(ExistProd[,c(1,4:18)]))
 #Removing them:
-ExistProd <- ExistProd[-c(35:41),]
+Duplicates <- ExistProd[c(32:41),]
+Duplicates[3,3] <- sum(Duplicates[3:10,3])/8
+Duplicates <- Duplicates[1:3,]
+ExistProd <- ExistProd[-c(32:41),]
+ExistProd <- rbind(ExistProd, Duplicates)
 ```
 ## 1.2.Removing useless columns
 ```{r}
@@ -55,7 +72,7 @@ ExistProd <- ExistProd[,-which(names(ExistProd) %in% c("Price","BestSellersRank"
 
 
 ?filter
-ExistProd <- select(ExistProd,-c(Price,BestSellersRank,ShippingWeight,ProductDepth,ProductWidth,ProductHeight))
+ExistProd <- select(ExistProd,-c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))
 
 NewProd <- NewProd[,-which(names(NewProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
 #BAD EXAMPLE: ExistProd <- ExistProd[,-c(2,12:16)]
@@ -64,10 +81,10 @@ NewProd <- NewProd[,-which(names(NewProd) %in% c("Price","BestSellersRank","Ship
 ## 1.3.Checking for outliers
 ```{r}
 #We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove all of them.
-ggplot(stack(ExistProd), aes(x=ind, y=values)) +geom_boxplot()
+ggplot(stack(ExistProd), aes(x=ind, y=values)) + geom_boxplot()
 
 #But we should look more in depth at least in the outliers of the dependent column
-ggplot(ExistProd, aes(x=ProductType, y=Volume)) +geom_boxplot()
+ggplot(ExistProd, aes(x=ProductType, y=Volume)) + geom_boxplot()
 
 #We have few outliers here as well. The R Built-in function will tell us the values
 boxplot(ExistProd$Volume, plot = FALSE)$out
@@ -76,6 +93,7 @@ boxplot(ExistProd$Volume, plot = FALSE)$out
 outliers <- boxplot(cars$distance, plot = FALSE)$out
 
 cars <- cars[-which(cars$distance %in% outliers),]
+
 ```
 ## 1.4.Scaling values
 ```{r}
@@ -102,13 +120,22 @@ corrplot(CorrData2, order="hclust", method = "number",
 #We dummify and add the new columns into a new dataset so we can run correlation matrix
 ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
 NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
+
+#We trained a tree based model to assess the mportance of each feature regardings the prediction of volume
+mRF <- randomForest(Volume ~., ExistProd2, ntree = 80)
+plot (mRF, main = "asd")
+ctrl <- trainControl(method="repeatedcv",repeats = 3, number = 5) #,classProbs=TRUE,summaryFunction = twoClassSummary)
+mRF2 <- train(Volume ~ ., data = trainS, method = "rf", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 2)
+
+varImpPlot(mRF)
+
 ```
 ## 2.2.Dealing with Collinearity
 ```{r}
 #We now look for collinearity in the newly dummified df
 CorrData <- cor(ExistProd2)
-findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
-
+CorNames <- findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
+ExistProd2 <- ExistProd2[, - which(names(ExistProd2) %in% CorNames)]
 #The above function recommends what columns we should erase based on collinearity. So we proceed to do that:
 #WORST EXAMPLE:
 #CM <- cor(ExistProd2)
