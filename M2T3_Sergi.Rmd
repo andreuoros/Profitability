@@ -1,34 +1,73 @@
 ---
 title: "M2T3"
-author: "Team: Sergi, Andreu, Paul"
-date: "7/16/2019"
+author: "Team Sergi, Andreu, Paul"
+date: "17/07/2019"
 output:
   html_document: default
-  pdf_document: default
 ---
+# **Executive summary**  
 
 # **Case**  
 
-The sales team of Blackwell Electronics ask for another analysis regarding sales performance of certain products in one of their stores. This time, the analysis aims again at the prediction of sales performance but even taking the product type into account to see wether and how specific product types outperforme others. Therefore, the historical sales data on sales volume has to be analysed again to assesses wether the inclusion of 'product type' has positive impact on predictability and finally to predict sales volume of new products. The for product types PC, Laptops, Netbooks and Smartphones are of particular interest as well as the the impact of service reviews and customer reviews on sales performance.
+> The sales team of Blackwell Electronics ask for another analysis regarding sales performance of certain products in one of their stores. This time, the analysis aims again at the prediction of sales performance but taking the product type into account to see whether and how specific product types outperform others. Therefore, the historical sales data on sales volume has to be analysed again to assesses whether the inclusion of 'product type' has positive impact on predictability and finally to predict sales volume of new products. The four product types are:  
+PC, Laptops, Netbooks and Smartphones.  
+Additionally, Blackwell expresses their interest in assessing the impact of service reviews and customer reviews on sales performance.  
 
-
-# **Executive summary**  
-  
-  
 **Procedure**  
   
 > The analysis followed the common data mining approach containing data the steps exploration, pre-processing, modelling and optimization, prediction, and evaluation.  
+For the analysis the statistical programming language R with different packages (e.g. 'caret' was used to apply several prediction techniques).  
+In particular, correlation Matrix, Random Forest and ANOVA test are applied to assess the importance of 'product type' and other attributes.  
+
+**Results**
+
+> The predicted sales volume is ordered from highest to lowest sales volume in Table 1.  
   
-> For the analysis the statistical programming language R with different packages e.g. 'caret' is used to apply several prediction techniques.  
+> Table1: Pred. Volume and profit by brand  
   
-> In particular, Corrleation matrix, random forest and ANOVA test are applied to assess the importance of 'product type' and other attributes.  
+Product Type | Brand    | Pred. Volume  | Profit (in k$)
+------------ | -------  | ------------- | --------------  
+Netbook	     |Acer	    | 734           | 22 
+PC	         |Dell1	    | 267           | 47 
+Smartphone	 |Samsung2  | 267           | 2 
+Laptop	     |Apple	    | 225           | 27
+Smartphone	 |Motorola1	| 181           | 4
+Smartphone	 |Motorola2	| 167           | 6
+PC	         |Dell2	    | 152           | 26
+Netbook	     |Asus	    | 137           | 7
+Smartphone	 |HTC	      | 134           | 3
+Netbook	     |hp	      | 101           | 3
+Netbook	     |Samsung1	| 95            | 3
+Laptop	     |Toshiba	  | 77            | 14
+Laptop	     |Razer	    | 0             | 0  
   
+> Table 2 - Total volume and profit by product categories  
   
-**Results**  
+Category    | Total Sales | Profit (in k$)
+------------| ----------- | --------------
+Netbooks	  | 1067        | 35
+Smartphones	| 749         | 15
+PC          | 419         | 73
+Laptop      | 302         | 41  
   
->  
-  
-  
+> The results show that, in terms of sales, the most sold product type would be Netbooks. In this category, our model has predicted the highest sales volume by far to be the Acer Netbook. Following in categories, Smartphones come in second, with Samsung being the most popular. Next are PCs, and last are laptops, coming close. However, the last two (PCs and Laptops) have the highest profit.  
+Addressing the interest in incorporating Product Type into our analysis, it unveiled that there is no impact on using the mentioned Product Type when we are trying to predict sales.  
+As far as the impact is on service and customer reviews, we concluded the following: The Positive Reviews, followed by the 4 and 3 stars had the highest impact on our prediction models.  
+Additionally, the predicted results agree with the previous analysis using RapidMiner.
+
+
+**Limitations**  
+
+> The dataset has limited products (80). A much larger number would increase the accuracy of the prediction.
+Some of the parameters of each product are barely relevant for our analysis. For instance, the dimensions (width, height and depth) cannot predict sales in our case.  
+Similarly, the Best Sellers Rank is missing many values and had to be excluded for analysis.
+
+
+**Recommendations**  
+
+> Consider the results to be only estimates and should only contribute to decision-making indicatively.  
+For further analysis, an expanded dataset in terms of products and a starting to record sales from now on with the purpose of contributing to a more meaningful analysis.  
+
 
 # **Technical documentation**
 # Table of contents
@@ -44,52 +83,12 @@ The sales team of Blackwell Electronics ask for another analysis regarding sales
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-<a name="IMPORTING DFs AND LIBRARIES"></a>  
-  
-## 0.IMPORTING DFs AND LIBRARIES 
+
 ```{r Setup, include=FALSE}
 # Load libraries
 #install.packages("pacman")
 library(pacman)
-library(caret)
-library(lattice)
-library(readr)
-library(Metrics)
-library(corrplot)
-library(e1071)
-library(mlr)
-library(recipes)
-library(ggplot2)
-library(C50)
-library(party)
-library(reshape)
-library(dplyr)
-library(markdown)
-library(ggpubr)
-library(tidyr)
-library(hydroGOF)
-library(BBmisc)
-library(tidyverse)
-library(textclean)
-library(inum)
-library(doParallel)
-library(Hmisc)
-library(caretEnsemble)
-library(mboost)
-library(rstudioapi)
-
-library(cluster)
-library(ade4)
-library(factoextra)
-library(asbio)
-#library(SatMatch)
-library(FactoMineR)
-library(fpc)
-library(e1071)
-library(randomForest)
-library(MASS)
-library(ParamHelpers)
-library(mlr)
+p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, cluster, ade4, factoextra, asbio, SatMatch, FactoMineR, fpc,e1071, randomForest, rstudioapi, MASS, ParamHelpers, mlr)
 
 # Enable parallel computing
 cl <- makePSOCKcluster(4)
@@ -97,7 +96,7 @@ registerDoParallel(cl)
 
 # Loading dataset(s)
 #current_path = getActiveDocumentContext()$path
-setwd("C:/Users/Paul/Desktop/Ubiqum/Module 2/2.3 Multiple Regression/Git/Profitability")
+#setwd("C:/Users/Paul/Desktop/Ubiqum/Module 2/2.3 Multiple Regression/Git/Profitability")
 
 ExistProd   <- read.csv("existingproductattributes2017.csv")
 NewProd     <- read.csv("newproductattributes2017.csv")
