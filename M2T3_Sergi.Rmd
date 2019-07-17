@@ -35,7 +35,9 @@ p_load(rstudioapi,ggplot2,dplyr,Metrics,caret,caTools,mlbench,C50,inum,doSNOW,mg
 ```{r}
 #Because we have worked with these products before, and because the dataset is small, we can observe duplicates just by looking at the df itself. We find out all 'ExtendedWarranty' products share the same values in everything (including exact number of reviews of all types) except for a small different in price. In a business sense, We conclude this is because warranties are sold alongside different products, only the same type of warranty is included, but will vary in price proportionally to the price itself. We should treat them as the same products and remove all but one.
 
-#Showing the 6 duplicates
+#Showing the 6 duplicates:
+#IMPORTANT NOTE: It's good practice to remove the columns by name instead of by column number, so that if we do changes in dataset later, and we reload these commands, we won't mess up unwanted columns.
+
 sum(duplicated(ExistProd[,c(1,4:18)]))
 #Removing them:
 ExistProd <- ExistProd[-c(35:41),]
@@ -48,14 +50,32 @@ ExistProd <- ExistProd[-c(35:41),]
 #3. Shipping Weight
 #4. Product Num (we don't want the id to add 'noise')
 
-#We proceed to get rid of the aforementioned columns in both df (they need to be the same for prediction)
-ExistProd <- ExistProd[,-c(2,12:16)]
-NewProd   <- NewProd[,-c(2,12:16)]
+#We proceed to get rid of the aforementioned columns in both df (they don't need to be the same for prediction, but it's good practice)
+ExistProd <- ExistProd[,-which(names(ExistProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
+
+
+?filter
+ExistProd <- select(ExistProd,-c(Price,BestSellersRank,ShippingWeight,ProductDepth,ProductWidth,ProductHeight))
+
+NewProd <- NewProd[,-which(names(NewProd) %in% c("Price","BestSellersRank","ShippingWeight","ProductDepth","ProductWidth","ProductHeight"))]
+#BAD EXAMPLE: ExistProd <- ExistProd[,-c(2,12:16)]
+            #NewProd    <- NewProd[,-c(2,12:16)]
 ```
 ## 1.3.Checking for outliers
 ```{r}
-#We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove them.
+#We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove all of them.
 ggplot(stack(ExistProd), aes(x=ind, y=values)) +geom_boxplot()
+
+#But we should look more in depth at least in the outliers of the dependent column
+ggplot(ExistProd, aes(x=ProductType, y=Volume)) +geom_boxplot()
+
+#We have few outliers here as well. The R Built-in function will tell us the values
+boxplot(ExistProd$Volume, plot = FALSE)$out
+
+
+outliers <- boxplot(cars$distance, plot = FALSE)$out
+
+cars <- cars[-which(cars$distance %in% outliers),]
 ```
 ## 1.4.Scaling values
 ```{r}
@@ -90,6 +110,12 @@ CorrData <- cor(ExistProd2)
 findCorrelation(CorrData, cutoff = 0.9, verbose = TRUE, names = TRUE)
 
 #The above function recommends what columns we should erase based on collinearity. So we proceed to do that:
+#WORST EXAMPLE:
+#CM <- cor(ExistProd2)
+#x  <- findCorrelation(CM, cutoff = 0.9, names = TRUE)
+#ExistProd2 <- ExistProd2[, - which(names(ExistProd2) %in% x)
+
+
 ExistProd2[ ,c(2,4,5)] <- list(NULL)
 NewProd2[ ,c(2,4,5)]   <- list(NULL)
 ```
@@ -139,6 +165,8 @@ compare.model.melt <- melt(compare.model, varnames = c("metric", "model"))
 compare.model.melt <- as.data.frame(compare.model.melt)
 compare.model.melt
 
+#All models offer quite different results, which indicates the predictions will have high variance between models.  
+#Based on errors, the SVM stands out in MAE (smaller error than others). RMSE is pretty similar in all. As for the RSquared, RF performes better than SVM here, but SVM comes in second, so we choose this model.
 for(i in c("RMSE","Rsquared","MAE")) {
   metric <-  compare.model.melt %>%  filter(metric == i)
   gg     <- ggplot(metric, aes(model,value))
@@ -147,10 +175,24 @@ for(i in c("RMSE","Rsquared","MAE")) {
 ```
 ## 5.Final Predictions
 ```{r}
-predictions <- predict(methods$svmLinear, NewProd2)
-predictions
+predictions_svm <- predict(methods$svmLinear, NewProd2)
+predictions_svm
 
-NewProd2$predictions <- predictions
+#predictions from another model: RF(because of the highest R squared)
+predictions_rf <- predict(methods$svmLinear, NewProd2)
+predictions_rf
+
+#Adding our predictions to the test set
+NewProd$predictions_svm <- predictions_svm
+NewProd$predictions_rf  <- predictions_rf
+Prod_Sales_Pred         <- NewProd[,-c(2:12)]
+Prod_Sales_Pred         <- Prod_Sales_Pred[-c(10:11,16:24),]
+
+#Adding id so we can plot it correctly
+Prod_Sales_Pred     <- mutate(Prod_Sales_Pred, id = rownames(Prod_Sales_Pred))
+
+#We can observe how sales vary among the different products
+ggplot(Prod_Sales_Pred, aes(x=id,y=predictions, fill=ProductType)) +geom_col()
 ```
 
 ```{r}
