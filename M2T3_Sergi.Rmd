@@ -6,6 +6,31 @@ output:
   pdf_document: default
   html_document: default
 ---
+
+# **Case**  
+
+The sales team of Blackwell Electronics ask for another analysis regarding sales performance of certain products in one of their stores. This time, the analysis aims again at the prediction of sales performance but even taking the product type into account to see wether and how specific product types outperforme others. Therefore, the historical sales data on sales volume has to be analysed again to assesses wether the inclusion of 'product type' has positive impact on predictability and finally to predict sales volume of new products. The for product types PC, Laptops, Netbooks and Smartphones are of particular interest as well as the the impact of service reviews and customer reviews on sales performance.
+
+
+# **Executive summary**  
+  
+  
+**Procedure**  
+  
+> The analysis followed the common data mining approach containing data the steps exploration, pre-processing, modelling and optimization, prediction, and evaluation.  
+  
+> For the analysis the statistical programming language R with different packages e.g. 'caret' is used to apply several prediction techniques.  
+  
+> In particular, Corrleation matrix, random forest and ANOVA test are applied to assess the importance of 'product type' and other attributes.  
+  
+  
+**Results**  
+  
+>  
+  
+  
+
+# **Technical documentation**
 # Table of contents
 0. [Importing DFs and Libraries](#Importing DFs and Libraries)
 1. [Data Exploration and preprocessing](#DATA EXPLORATION AND PREPROCESSING)
