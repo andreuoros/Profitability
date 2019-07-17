@@ -1,0 +1,835 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={M2T3},
+            pdfauthor={Team Sergi, Andreu, Paul},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{M2T3}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Team Sergi, Andreu, Paul}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{17/07/2019}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{executive-summary}{%
+\section{\texorpdfstring{\textbf{Executive
+summary}}{Executive summary}}\label{executive-summary}}
+
+\hypertarget{case}{%
+\section{\texorpdfstring{\textbf{Case}}{Case}}\label{case}}
+
+\begin{quote}
+The sales team of Blackwell Electronics ask for another analysis
+regarding sales performance of certain products in one of their stores.
+This time, the analysis aims again at the prediction of sales
+performance but taking the product type into account to see whether and
+how specific product types outperform others. Therefore, the historical
+sales data on sales volume has to be analysed again to assesses whether
+the inclusion of `product type' has positive impact on predictability
+and finally to predict sales volume of new products. The four product
+types are:\\
+PC, Laptops, Netbooks and Smartphones.\\
+Additionally, Blackwell expresses their interest in assessing the impact
+of service reviews and customer reviews on sales performance.
+\end{quote}
+
+\textbf{Procedure}
+
+\begin{quote}
+The analysis followed the common data mining approach containing data
+the steps exploration, pre-processing, modelling and optimization,
+prediction, and evaluation.\\
+For the analysis the statistical programming language R with different
+packages (e.g.~`caret' was used to apply several prediction
+techniques).\\
+In particular, correlation Matrix, Random Forest and ANOVA test are
+applied to assess the importance of `product type' and other attributes.
+\end{quote}
+
+\textbf{Results}
+
+\begin{quote}
+The predicted sales volume is ordered from highest to lowest sales
+volume in Table 1.
+\end{quote}
+
+\begin{quote}
+Table 1: Pred. Volume and profit by brand
+\end{quote}
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+Product Type & Brand & Pred. Volume & Profit (in k\$)\tabularnewline
+\midrule
+\endhead
+Netbook & Acer & 734 & 22\tabularnewline
+PC & Dell1 & 267 & 47\tabularnewline
+Smartphone & Samsung2 & 267 & 2\tabularnewline
+Laptop & Apple & 225 & 27\tabularnewline
+Smartphone & Motorola1 & 181 & 4\tabularnewline
+Smartphone & Motorola2 & 167 & 6\tabularnewline
+PC & Dell2 & 152 & 26\tabularnewline
+Netbook & Asus & 137 & 7\tabularnewline
+Smartphone & HTC & 134 & 3\tabularnewline
+Netbook & hp & 101 & 3\tabularnewline
+Netbook & Samsung1 & 95 & 3\tabularnewline
+Laptop & Toshiba & 77 & 14\tabularnewline
+Laptop & Razer & 0 & 0\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{quote}
+Table 2 - Total volume and profit by product categories
+\end{quote}
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Category & Total Sales & Profit (in k\$)\tabularnewline
+\midrule
+\endhead
+Netbooks & 1067 & 35\tabularnewline
+Smartphones & 749 & 15\tabularnewline
+PC & 419 & 73\tabularnewline
+Laptop & 302 & 41\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{quote}
+The results show that, in terms of sales, the most sold product type
+would be Netbooks. In this category, our model has predicted the highest
+sales volume by far to be the Acer Netbook. Following in categories,
+Smartphones come in second, with Samsung being the most popular. Next
+are PCs, and last are laptops, coming close. However, the last two (PCs
+and Laptops) have the highest profit.\\
+Addressing the interest in incorporating Product Type into our analysis,
+it unveiled that there is no impact on using the mentioned Product Type
+when we are trying to predict sales.\\
+As far as the impact is on service and customer reviews, we concluded
+the following: The Positive Reviews, followed by the 4 and 3 stars had
+the highest impact on our prediction models.\\
+Additionally, the predicted results agree with the previous analysis
+using RapidMiner.
+\end{quote}
+
+\textbf{Limitations}
+
+\begin{quote}
+The dataset has limited products (80). A much larger number would
+increase the accuracy of the prediction. Some of the parameters of each
+product are barely relevant for our analysis. For instance, the
+dimensions (width, height and depth) cannot predict sales in our case.\\
+Similarly, the Best Sellers Rank is missing many values and had to be
+excluded for analysis.
+\end{quote}
+
+\textbf{Recommendations}
+
+\begin{quote}
+Consider the results to be only estimates and should only contribute to
+decision-making indicatively.\\
+For further analysis, an expanded dataset in terms of products and a
+starting to record sales from now on with the purpose of contributing to
+a more meaningful analysis.
+\end{quote}
+
+\hypertarget{technical-documentation}{%
+\section{\texorpdfstring{\textbf{Technical
+documentation}}{Technical documentation}}\label{technical-documentation}}
+
+\hypertarget{table-of-contents}{%
+\section{Table of contents}\label{table-of-contents}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \protect\hyperlink{Dataux5cux2520Explorationux5cux2520andux5cux2520preprocessing}{Data
+  Exploration and preprocessing}
+
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \tightlist
+  \item
+    \protect\hyperlink{Dealingux5cux2520withux5cux2520repeatedux5cux2520products}{Dealing
+    with repeated products}
+  \item
+    \protect\hyperlink{Removingux5cux2520uselessux5cux2520columns}{Removing
+    useless columns}
+  \item
+    \protect\hyperlink{Checkingux5cux2520forux5cux2520outliers}{Checking
+    for outliers}
+  \end{enumerate}
+\item
+  \protect\hyperlink{Featureux5cux2520Engineering}{Feature Engineering}
+\item
+  \protect\hyperlink{Modelling}{Modelling}
+\item
+  \protect\hyperlink{Analyzingux5cux2520andux5cux2520Plottingux5cux2520Errors}{Analyzing
+  and Plotting Errors}
+\item
+  \protect\hyperlink{Finalux5cux2520Predictions}{Final Predictions}
+\end{enumerate}
+
+\hypertarget{data-exploration-and-preprocessing}{%
+\subsection{1.DATA EXPLORATION AND
+PREPROCESSING}\label{data-exploration-and-preprocessing}}
+
+\hypertarget{dealing-with-repeated-products}{%
+\subsection{1.1.Dealing with repeated
+products}\label{dealing-with-repeated-products}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Because we have worked with these products before, and because the dataset is small, we can observe duplicates just by looking at the df itself. We find out all 'ExtendedWarranty' products share the same values in everything (including exact number of reviews of all types) except for a small different in price. In a business sense, We conclude this is because warranties are sold alongside different products, only the same type of warranty is included, but will vary in price proportionally to the price itself. We should treat them as the same products and remove all but one.}
+
+\CommentTok{#Showing the 6 duplicates:}
+\CommentTok{#IMPORTANT }\AlertTok{NOTE}\CommentTok{: It's good practice to remove the columns by name instead of by column number, so that if we do changes in dataset later, and we reload these commands, we won't mess up unwanted columns.}
+
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{duplicated}\NormalTok{(ExistProd[,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{4}\OperatorTok{:}\DecValTok{18}\NormalTok{)]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Removing them, but setting an average price for the remaining product of Warranty:}
+\CommentTok{#ExistProd <- ExistProd[-c(35:41),]}
+\NormalTok{Duplicates <-}\StringTok{ }\NormalTok{ExistProd[}\KeywordTok{c}\NormalTok{(}\DecValTok{32}\OperatorTok{:}\DecValTok{41}\NormalTok{),]}
+\NormalTok{Duplicates[}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(Duplicates[}\DecValTok{3}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{3}\NormalTok{])}\OperatorTok{/}\DecValTok{8}
+\NormalTok{Duplicates <-}\StringTok{ }\NormalTok{Duplicates[}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{,]}
+\NormalTok{ExistProd  <-}\StringTok{ }\NormalTok{ExistProd[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{32}\OperatorTok{:}\DecValTok{41}\NormalTok{),]}
+\NormalTok{ExistProd  <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(ExistProd, Duplicates)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{removing-useless-columns}{%
+\subsection{1.2.Removing useless
+columns}\label{removing-useless-columns}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We checked in the previous project that some columns were not useful and just added noise to our prediction model. The columns are:}
+\CommentTok{#1. Product dimensions (width, Depth and Height)}
+\CommentTok{#2. Best Sellers Rank}
+\CommentTok{#3. Shipping Weight}
+\CommentTok{#4. Product Num (we don't want the id to add 'noise')}
+
+\CommentTok{#We proceed to get rid of the aforementioned columns in both df (they don't need to be the same for prediction, but it's good practice)}
+
+\NormalTok{ExistProd <-}\StringTok{ }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(ExistProd,}\OperatorTok{-}\KeywordTok{c}\NormalTok{(ProductNum,BestSellersRank,ShippingWeight,ProductDepth, ProductWidth, ProductHeight))}
+
+\NormalTok{NewProd  <-}\StringTok{ }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(NewProd,}\OperatorTok{-}\KeywordTok{c}\NormalTok{(ProductNum,BestSellersRank,ShippingWeight,ProductDepth, ProductWidth, ProductHeight))}
+\CommentTok{#BAD EXAMPLE: ExistProd <- ExistProd[,-c(2,12:16)]}
+            \CommentTok{#NewProd    <- NewProd[,-c(2,12:16)]}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{checking-for-outliers}{%
+\subsection{1.3.Checking for outliers}\label{checking-for-outliers}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove all of them.}
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{stack}\NormalTok{(ExistProd), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ind, }\DataTypeTok{y=}\NormalTok{values)) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#But we should look more in depth at least in the outliers of the dependent column}
+\KeywordTok{ggplot}\NormalTok{(ExistProd, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ProductType, }\DataTypeTok{y=}\NormalTok{Volume)) }\OperatorTok{+}\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-3-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We have few outliers here as well. The R Built-in function will tell us the values.}
+\KeywordTok{boxplot}\NormalTok{(ExistProd}\OperatorTok{$}\NormalTok{Volume, }\DataTypeTok{plot =} \OtherTok{FALSE}\NormalTok{)}\OperatorTok{$}\NormalTok{out}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  2052  2140 11204  1896  7036  1684
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#But we only want to remove the two extreme outliers because our dataset is small, and because these outliers don't belong to the product types we want to predict.}
+\NormalTok{ExistProd <-}\StringTok{ }\NormalTok{ExistProd[}\OperatorTok{-}\KeywordTok{which}\NormalTok{(ExistProd}\OperatorTok{$}\NormalTok{Volume }\OperatorTok{>}\StringTok{ }\DecValTok{7000}\NormalTok{),]}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{scaling-values}{%
+\subsection{1.4.Scaling values}\label{scaling-values}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Since different variables have different units, we are going to scale all numeric variables (except label):}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{11}\NormalTok{))\{ExistProd[,i] <-}\StringTok{ }\KeywordTok{scale}\NormalTok{(ExistProd[,i])\}}
+
+\CommentTok{#We do the same in NewProd df}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{11}\NormalTok{))\{NewProd[,i] <-}\StringTok{ }\KeywordTok{scale}\NormalTok{(NewProd[,i])\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{feature-engineering}{%
+\subsection{2. FEATURE ENGINEERING}\label{feature-engineering}}
+
+\hypertarget{dealing-with-non-numeric-features-dummifying}{%
+\subsection{2.1.Dealing with non-numeric features
+(Dummifying)}\label{dealing-with-non-numeric-features-dummifying}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We are going to dummify(turn categorical values into logical ones)}
+\CommentTok{#We need to dummify Product Type only. We check if it's a factor first}
+\KeywordTok{str}\NormalTok{(ExistProd}\OperatorTok{$}\NormalTok{ProductType)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Factor w/ 12 levels "Accessories",..: 7 7 7 5 5 1 1 1 1 1 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#The Correlation Matrix is only going to work with numeric values, so we create another df as to avoid messing with the current one, so that we can run a correlation matrix. We do this before dummifying, because once we dummify we'll have lots of variables and the correlation matrix will be way harder to read.}
+\NormalTok{ExistProd_corr <-}\StringTok{ }\NormalTok{ExistProd[,}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{)]}
+
+\NormalTok{CorrData2 <-}\StringTok{ }\KeywordTok{cor}\NormalTok{(ExistProd_corr)}
+\KeywordTok{corrplot}\NormalTok{(CorrData2, }\DataTypeTok{order=}\StringTok{"hclust"}\NormalTok{, }\DataTypeTok{method =} \StringTok{"number"}\NormalTok{,}
+        \DataTypeTok{tl.col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{tl.srt =} \DecValTok{90}\NormalTok{ , }\DataTypeTok{tl.cex =} \FloatTok{0.7}\NormalTok{, }\DataTypeTok{tl.pos =} \StringTok{"t"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#In order to find out the relationship between the label and the ProductType (categorical), we are going to use the ANOVA test.}
+\NormalTok{ANOVA <-}\StringTok{ }\KeywordTok{aov}\NormalTok{(ExistProd}\OperatorTok{$}\NormalTok{Volume}\OperatorTok{~}\StringTok{ }\NormalTok{ExistProd}\OperatorTok{$}\NormalTok{ProductType)}
+\KeywordTok{summary}\NormalTok{(ANOVA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                       Df   Sum Sq Mean Sq F value Pr(>F)
+## ExistProd$ProductType 11  5075621  461420   1.473  0.166
+## Residuals             59 18487579  313349
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Since the p-value is higher than 0.05, we reject the Null Hypothesis, which states that both variables come from the same population. Therefore, it's not useful to use this variable to predict Volume.}
+
+\CommentTok{#Now we will confirm this with a Random Forest w/ dummyfeatures}
+\NormalTok{ExistProd2 <-}\StringTok{ }\KeywordTok{createDummyFeatures}\NormalTok{(}\DataTypeTok{obj =}\NormalTok{ ExistProd, }\DataTypeTok{cols =} \StringTok{"ProductType"}\NormalTok{)}
+\NormalTok{NewProd2   <-}\StringTok{ }\KeywordTok{createDummyFeatures}\NormalTok{(}\DataTypeTok{obj =}\NormalTok{ NewProd, }\DataTypeTok{cols =} \StringTok{"ProductType"}\NormalTok{)}
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{107}\NormalTok{)}
+
+\NormalTok{inTrain  <-}\StringTok{ }\KeywordTok{createDataPartition}\NormalTok{(ExistProd2}\OperatorTok{$}\NormalTok{Volume,}\DataTypeTok{p =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{list =} \OtherTok{FALSE}\NormalTok{)}
+\NormalTok{training <-}\StringTok{ }\NormalTok{ExistProd2[inTrain,]}
+\NormalTok{testing  <-}\StringTok{ }\NormalTok{ExistProd2[}\OperatorTok{-}\NormalTok{inTrain,]}
+\NormalTok{ctrl     <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+
+
+\NormalTok{mRF  <-}\StringTok{ }\KeywordTok{randomForest}\NormalTok{(Volume }\OperatorTok{~}\NormalTok{., ExistProd2, }\DataTypeTok{ntree =} \DecValTok{80}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{ (mRF, }\DataTypeTok{main =} \StringTok{"Performance of RF depending on the number of trees"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ctrl <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method=}\StringTok{"repeatedcv"}\NormalTok{,}\DataTypeTok{repeats =} \DecValTok{3}\NormalTok{, }\DataTypeTok{number =} \DecValTok{5}\NormalTok{) }\CommentTok{#,classProbs=TRUE,summaryFunction = twoClassSummary)}
+\NormalTok{mRF2 <-}\StringTok{ }\NormalTok{caret}\OperatorTok{::}\KeywordTok{train}\NormalTok{(Volume }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ training, }\DataTypeTok{method =} \StringTok{"rf"}\NormalTok{, }\DataTypeTok{trControl =}\NormalTok{ ctrl, }\DataTypeTok{preProcess =} \KeywordTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{,}\StringTok{"scale"}\NormalTok{), }\DataTypeTok{tuneLength =} \DecValTok{2}\NormalTok{)}
+
+\KeywordTok{varImpPlot}\NormalTok{(mRF, }\DataTypeTok{main =} \StringTok{"Performance of RF depending on the number of trees"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-5-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#As a conclusion, we get rid of Product Type}
+\NormalTok{ExistProd}\OperatorTok{$}\NormalTok{ProductType <-}\StringTok{ }\OtherTok{NULL}
+
+
+\CommentTok{#ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")}
+\CommentTok{#NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{dealing-with-collinearity}{%
+\subsection{2.2.Dealing with
+Collinearity}\label{dealing-with-collinearity}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We now look for collinearity in the newly dummified df}
+\NormalTok{CorrData <-}\StringTok{ }\KeywordTok{cor}\NormalTok{(ExistProd)}
+\NormalTok{CorNames <-}\StringTok{ }\KeywordTok{findCorrelation}\NormalTok{(CorrData, }\DataTypeTok{cutoff =} \FloatTok{0.9}\NormalTok{, }\DataTypeTok{verbose =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{names =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Compare row 4  and column  3 with corr  0.907 
+##   Means:  0.554 vs 0.374 so flagging column 4 
+## Compare row 5  and column  6 with corr  0.979 
+##   Means:  0.478 vs 0.343 so flagging column 5 
+## Compare row 2  and column  11 with corr  1 
+##   Means:  0.476 vs 0.3 so flagging column 2 
+## All correlations <= 0.9
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#The above function recommends what columns we should erase based on collinearity. So we proceed to do that:}
+\NormalTok{ExistProd <-}\StringTok{ }\NormalTok{ExistProd[, }\OperatorTok{-}\StringTok{ }\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(ExistProd) }\OperatorTok{%in%}\StringTok{ }\NormalTok{CorNames)]}
+
+\CommentTok{#BAD PRACTICE}
+\CommentTok{#ExistProd[ ,c(2,4,5)] <- list(NULL)}
+\CommentTok{#NewProd[ ,c(2,4,5)]   <- list(NULL)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{modelling}{%
+\subsection{3. Modelling}\label{modelling}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{107}\NormalTok{)}
+
+\NormalTok{inTrain  <-}\StringTok{ }\KeywordTok{createDataPartition}\NormalTok{(ExistProd2}\OperatorTok{$}\NormalTok{Volume,}\DataTypeTok{p =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{list =} \OtherTok{FALSE}\NormalTok{)}
+\NormalTok{training <-}\StringTok{ }\NormalTok{ExistProd2[inTrain,]}
+\NormalTok{testing  <-}\StringTok{ }\NormalTok{ExistProd2[}\OperatorTok{-}\NormalTok{inTrain,]}
+\NormalTok{ctrl     <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+
+\KeywordTok{nrow}\NormalTok{(training)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 55
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{nrow}\NormalTok{(testing)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#The chosen models are looped below}
+\NormalTok{Five_Models   <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"lm"}\NormalTok{, }\StringTok{"rf"}\NormalTok{, }\StringTok{"knn"}\NormalTok{, }\StringTok{"svmLinear"}\NormalTok{, }\StringTok{"gbm"}\NormalTok{)}
+
+\CommentTok{#We create an empty variable so we can later assign all results to it}
+\NormalTok{compare.model <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+
+\CommentTok{#We run all models at once and assign the results in 'compare.model'.}
+\CommentTok{#However, now the loop is overwriting each model as it goes through them, so it will only keep the last one saved.}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in}\NormalTok{ Five_Models)\{}
+\NormalTok{  model         <-}\StringTok{ }\NormalTok{caret}\OperatorTok{::}\KeywordTok{train}\NormalTok{(Volume }\OperatorTok{~}\NormalTok{., }\DataTypeTok{data =}\NormalTok{ training, }\DataTypeTok{method =}\NormalTok{ i, )}
+\NormalTok{  pred          <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(model, }\DataTypeTok{newdata =}\NormalTok{ testing)}
+\NormalTok{  pred.metric   <-}\StringTok{ }\KeywordTok{postResample}\NormalTok{(testing}\OperatorTok{$}\NormalTok{Volume, }\DataTypeTok{obs =}\NormalTok{ pred)}
+\NormalTok{  compare.model <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(pred.metric, compare.model)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+##      1   313823.5317             nan     0.1000 40051.1907
+##      2   281141.9833             nan     0.1000 36576.1443
+##      3   243944.3453             nan     0.1000 25128.4651
+##      4   227056.8211             nan     0.1000 18409.0107
+##      5   211217.7925             nan     0.1000 19245.5370
+##      6   189509.0779             nan     0.1000 17120.2941
+##      7   175637.2247             nan     0.1000 2595.9761
+##      8   171221.4563             nan     0.1000  372.4642
+##      9   160521.7337             nan     0.1000 11451.3583
+##     10   155619.3410             nan     0.1000  724.0868
+##     20    97964.3675             nan     0.1000 3784.9466
+##     40    71691.6121             nan     0.1000 -512.2182
+##     50    68044.7417             nan     0.1000 -607.8096
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#That's why we create a list with all models so that we can later choose the model}
+\NormalTok{methods <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+
+\CommentTok{#We will save them in the variable previously created}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in}\NormalTok{ Five_Models) \{}
+\NormalTok{  methods[[i]] <-}\StringTok{ }\NormalTok{caret}\OperatorTok{::}\KeywordTok{train}\NormalTok{(Volume }\OperatorTok{~}\NormalTok{., }\DataTypeTok{data =}\NormalTok{ training, }\DataTypeTok{method =}\NormalTok{ i )}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+##      1   307578.8280             nan     0.1000 41207.7924
+##      2   286305.2500             nan     0.1000 19030.2813
+##      3   261112.1845             nan     0.1000 28267.1541
+##      4   241705.6523             nan     0.1000 14618.5178
+##      5   204843.1469             nan     0.1000 26150.5048
+##      6   185556.7377             nan     0.1000 18609.4629
+##      7   178005.6144             nan     0.1000 7763.0654
+##      8   159496.5745             nan     0.1000 13674.8079
+##      9   139299.9802             nan     0.1000 9006.8488
+##     10   129438.4131             nan     0.1000 5994.8550
+##     20    83051.1139             nan     0.1000 -1019.0330
+##     40    65818.0608             nan     0.1000 -1494.6146
+##     60    58964.5250             nan     0.1000 -799.1243
+##     80    54570.5628             nan     0.1000 -182.9114
+##    100    50063.0809             nan     0.1000 -689.4158
+##    120    44184.3397             nan     0.1000 -860.5722
+##    140    42799.7584             nan     0.1000 -209.3923
+##    150    40323.4292             nan     0.1000 -518.1395
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{methods}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $lm
+## Linear Regression 
+## 
+## 55 samples
+## 22 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 55, 55, 55, 55, 55, 55, ... 
+## Resampling results:
+## 
+##   RMSE                   Rsquared  MAE                  
+##   0.0000000000005406146  1         0.0000000000003916189
+## 
+## Tuning parameter 'intercept' was held constant at a value of TRUE
+## 
+## $rf
+## Random Forest 
+## 
+## 55 samples
+## 22 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 55, 55, 55, 55, 55, 55, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  RMSE      Rsquared   MAE      
+##    2    310.5234  0.8459020  201.14610
+##   12    180.6845  0.9361108   96.03043
+##   22    150.1520  0.9521491   77.92924
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was mtry = 22.
+## 
+## $knn
+## k-Nearest Neighbors 
+## 
+## 55 samples
+## 22 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 55, 55, 55, 55, 55, 55, ... 
+## Resampling results across tuning parameters:
+## 
+##   k  RMSE      Rsquared   MAE     
+##   5  250.5506  0.8560911  160.4576
+##   7  254.6291  0.8658619  169.5987
+##   9  271.0767  0.8670381  183.6637
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was k = 5.
+## 
+## $svmLinear
+## Support Vector Machines with Linear Kernel 
+## 
+## 55 samples
+## 22 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 55, 55, 55, 55, 55, 55, ... 
+## Resampling results:
+## 
+##   RMSE      Rsquared   MAE     
+##   507.7142  0.8739201  306.0704
+## 
+## Tuning parameter 'C' was held constant at a value of 1
+## 
+## $gbm
+## Stochastic Gradient Boosting 
+## 
+## 55 samples
+## 22 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 55, 55, 55, 55, 55, 55, ... 
+## Resampling results across tuning parameters:
+## 
+##   interaction.depth  n.trees  RMSE      Rsquared   MAE     
+##   1                   50      319.8130  0.7433712  222.8188
+##   1                  100      317.0902  0.7356551  227.5105
+##   1                  150      322.5018  0.7255873  232.8695
+##   2                   50      317.0595  0.7405268  219.8445
+##   2                  100      317.3141  0.7307384  226.8979
+##   2                  150      315.9586  0.7289831  227.2538
+##   3                   50      316.2784  0.7406168  219.6941
+##   3                  100      317.0800  0.7363365  225.7095
+##   3                  150      318.8884  0.7271765  227.6880
+## 
+## Tuning parameter 'shrinkage' was held constant at a value of 0.1
+## 
+## Tuning parameter 'n.minobsinnode' was held constant at a value of 10
+## RMSE was used to select the optimal model using the smallest value.
+## The final values used for the model were n.trees = 150,
+##  interaction.depth = 2, shrinkage = 0.1 and n.minobsinnode = 10.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{colnames}\NormalTok{(compare.model) <-}\StringTok{ }\NormalTok{Five_Models}
+\NormalTok{compare.model}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                  lm          rf         knn  svmLinear
+## RMSE     295.757896 359.1920424 214.8119177 82.8867239
+## Rsquared   0.690411   0.9533011   0.8578734  0.9829067
+## MAE      209.847853 125.9877635 157.9000000 46.9278500
+##                            gbm
+## RMSE     0.0000000000011504055
+## Rsquared 1.0000000000000000000
+## MAE      0.0000000000004392184
+\end{verbatim}
+
+\hypertarget{analyzing-and-plotting-errors}{%
+\subsection{4.Analyzing and plotting
+errors}\label{analyzing-and-plotting-errors}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{compare.model.melt <-}\StringTok{ }\KeywordTok{melt}\NormalTok{(compare.model, }\DataTypeTok{varnames =} \KeywordTok{c}\NormalTok{(}\StringTok{"metric"}\NormalTok{, }\StringTok{"model"}\NormalTok{))}
+\NormalTok{compare.model.melt <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(compare.model.melt)}
+\NormalTok{compare.model.melt}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      metric     model                   value
+## 1      RMSE        lm 295.7578956262769338537
+## 2  Rsquared        lm   0.6904110497774719191
+## 3       MAE        lm 209.8478529724644090493
+## 4      RMSE        rf 359.1920423674124549507
+## 5  Rsquared        rf   0.9533010846879089728
+## 6       MAE        rf 125.9877634701227009373
+## 7      RMSE       knn 214.8119177326993849420
+## 8  Rsquared       knn   0.8578733655585467632
+## 9       MAE       knn 157.9000000000000056843
+## 10     RMSE svmLinear  82.8867239437722247430
+## 11 Rsquared svmLinear   0.9829067436369132160
+## 12      MAE svmLinear  46.9278499999999780812
+## 13     RMSE       gbm   0.0000000000011504055
+## 14 Rsquared       gbm   1.0000000000000000000
+## 15      MAE       gbm   0.0000000000004392184
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#All models offer quite different results, which indicates the predictions will have high variance between models.  }
+\CommentTok{#Based on errors, the SVM stands out in MAE (smaller error than others). RMSE is pretty similar in all. As for the RSquared, RF performes better than SVM here, but SVM comes in second, so we choose this model.}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \KeywordTok{c}\NormalTok{(}\StringTok{"RMSE"}\NormalTok{,}\StringTok{"Rsquared"}\NormalTok{,}\StringTok{"MAE"}\NormalTok{)) \{}
+\NormalTok{  metric <-}\StringTok{  }\NormalTok{compare.model.melt }\OperatorTok{%>%}\StringTok{  }\KeywordTok{filter}\NormalTok{(metric }\OperatorTok{==}\StringTok{ }\NormalTok{i)}
+\NormalTok{  gg     <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(metric, }\KeywordTok{aes}\NormalTok{(model,value))}
+  \KeywordTok{print}\NormalTok{(gg }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"identity"}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(i))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-8-1.pdf}
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-8-2.pdf}
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-8-3.pdf}
+
+\hypertarget{final-predictions}{%
+\subsection{5.Final Predictions}\label{final-predictions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions_svm <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(methods}\OperatorTok{$}\NormalTok{svmLinear, NewProd2)}
+\NormalTok{predictions_svm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          1          2          3          4          5          6 
+##  306.10722  203.20065  227.05095   43.66592  -48.88348  132.54230 
+##          7          8          9         10         11         12 
+##  767.52884  142.75748   79.33107  684.13076 2504.82682  325.20232 
+##         13         14         15         16         17         18 
+##  394.90194  180.11386  222.16805 1059.01335   97.12584  165.24101 
+##         19         20         21         22         23         24 
+##  154.88560  170.53507  234.14689  133.09492   37.65265 2598.67423
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Adding our predictions to the test set}
+\NormalTok{Prod_Sales_Pred                 <-}\StringTok{ }\NormalTok{NewProd_Raw[,}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(NewProd_Raw))]}
+\NormalTok{Prod_Sales_Pred}\OperatorTok{$}\NormalTok{predictions_svm <-}\StringTok{ }\NormalTok{predictions_svm}
+\NormalTok{Prod_Sales_Pred                 <-}\StringTok{ }\NormalTok{Prod_Sales_Pred[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{10}\OperatorTok{:}\DecValTok{11}\NormalTok{,}\DecValTok{16}\OperatorTok{:}\DecValTok{24}\NormalTok{),]}
+
+
+\NormalTok{Prod_Sales_Pred}\OperatorTok{$}\NormalTok{ProductNum <-}\StringTok{ }\KeywordTok{mgsub}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Prod_Sales_Pred}\OperatorTok{$}\NormalTok{ProductNum,}\DataTypeTok{pattern =} \KeywordTok{c}\NormalTok{(}\DecValTok{171}\NormalTok{,}\DecValTok{172}\NormalTok{,}\DecValTok{173}\NormalTok{,}\DecValTok{175}\NormalTok{,}\DecValTok{176}\NormalTok{,}\DecValTok{178}\NormalTok{,}\DecValTok{180}\NormalTok{,}\DecValTok{181}\NormalTok{,}\DecValTok{183}\NormalTok{,}\DecValTok{193}\NormalTok{,}\DecValTok{194}\NormalTok{,}\DecValTok{195}\NormalTok{,}\DecValTok{196}\NormalTok{), }\DataTypeTok{replacement =} \KeywordTok{c}\NormalTok{(}\StringTok{"Dell1"}\NormalTok{,}\StringTok{"Dell2"}\NormalTok{,}\StringTok{"Apple"}\NormalTok{,}\StringTok{"Toshiba"}\NormalTok{,}\StringTok{"Razer"}\NormalTok{,}\StringTok{"hp"}\NormalTok{,}\StringTok{"Acer"}\NormalTok{,}\StringTok{"Asus"}\NormalTok{,}\StringTok{"Samsung1"}\NormalTok{,}\StringTok{"Motorola1"}\NormalTok{,}\StringTok{"Samsung2"}\NormalTok{,}\StringTok{"HTC"}\NormalTok{,}\StringTok{"Motorola2"}\NormalTok{))}
+
+\CommentTok{#We can observe how sales vary among the different products}
+\KeywordTok{ggplot}\NormalTok{(Prod_Sales_Pred, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ProductNum,}\DataTypeTok{y=}\NormalTok{predictions_svm, }\DataTypeTok{fill=}\NormalTok{ProductType)) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{M2T3_Sergi_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+
+\end{document}

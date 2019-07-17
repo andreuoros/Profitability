@@ -3,6 +3,7 @@ title: "M2T3"
 author: "Team Sergi, Andreu, Paul"
 date: "17/07/2019"
 output:
+  #pdf_document: default
   html_document: default
 ---
 # **Executive summary**  
@@ -93,6 +94,9 @@ p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C
 # Enable parallel computing
 cl <- makePSOCKcluster(4)
 registerDoParallel(cl)
+
+#disable scientific notation
+options(scipen = 999)
 
 # Loading dataset(s)
 #current_path = getActiveDocumentContext()$path
