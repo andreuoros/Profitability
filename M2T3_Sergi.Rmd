@@ -120,6 +120,15 @@ corrplot(CorrData2, order="hclust", method = "number",
 #We dummify and add the new columns into a new dataset so we can run correlation matrix
 ExistProd2 <- createDummyFeatures(obj = ExistProd, cols = "ProductType")
 NewProd2   <- createDummyFeatures(obj = NewProd, cols = "ProductType")
+
+#We trained a tree based model to assess the mportance of each feature regardings the prediction of volume
+mRF <- randomForest(Volume ~., ExistProd2, ntree = 80)
+plot (mRF, main = "asd")
+ctrl <- trainControl(method="repeatedcv",repeats = 3, number = 5) #,classProbs=TRUE,summaryFunction = twoClassSummary)
+mRF2 <- train(Volume ~ ., data = trainS, method = "rf", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 2)
+
+varImpPlot(mRF)
+
 ```
 ## 2.2.Dealing with Collinearity
 ```{r}
