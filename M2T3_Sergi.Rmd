@@ -1,10 +1,10 @@
 ---
 title: "M2T3"
-author: "Sergi"
+author: "Team: Sergi, Andreu, Paul"
 date: "7/16/2019"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 # **Case**  
@@ -32,38 +32,79 @@ The sales team of Blackwell Electronics ask for another analysis regarding sales
 
 # **Technical documentation**
 # Table of contents
-0. [Importing DFs and Libraries](#Importing DFs and Libraries)
-1. [Data Exploration and preprocessing](#DATA EXPLORATION AND PREPROCESSING)
+1. [Data Exploration and preprocessing](#Data Exploration and preprocessing)
     1. [Dealing with repeated products](#Dealing with repeated products)
-    2. [Removing useless columns](#subparagraph2)
-    3. [Checking for outliers](#subparagraph3)
-2. [Feature Engineering](#paragraph2)
-3. [Predictive Models](#paragraph3)
-4. [Analyzing and Plotting Errors](#paragraph4)
-5. [Final Predictions](#paragraph5)
+    2. [Removing useless columns](#Removing useless columns)
+    3. [Checking for outliers](#Checking for outliers)
+2. [Feature Engineering](#Feature Engineering)
+3. [Modelling](#Modelling)
+4. [Analyzing and Plotting Errors](#Analyzing and Plotting Errors)
+5. [Final Predictions](#Final Predictions)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## 0.IMPORTING DFs AND LIBRARIES
-```{r}
+<a name="IMPORTING DFs AND LIBRARIES"></a>  
+  
+## 0.IMPORTING DFs AND LIBRARIES 
+```{r Setup, include=FALSE}
 # Load libraries
-install.packages("pacman")
+#install.packages("pacman")
 library(pacman)
-p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, cluster, ade4, factoextra, asbio, SatMatch, FactoMineR, fpc,e1071, randomForest, rstudioapi, MASS, ParamHelpers, mlr)
+library(caret)
+library(lattice)
+library(readr)
+library(Metrics)
+library(corrplot)
+library(e1071)
+library(mlr)
+library(recipes)
+library(ggplot2)
+library(C50)
+library(party)
+library(reshape)
+library(dplyr)
+library(markdown)
+library(ggpubr)
+library(tidyr)
+library(hydroGOF)
+library(BBmisc)
+library(tidyverse)
+library(textclean)
+library(inum)
+library(doParallel)
+library(Hmisc)
+library(caretEnsemble)
+library(mboost)
+library(rstudioapi)
+
+library(cluster)
+library(ade4)
+library(factoextra)
+library(asbio)
+#library(SatMatch)
+library(FactoMineR)
+library(fpc)
+library(e1071)
+library(randomForest)
+library(MASS)
+library(ParamHelpers)
+library(mlr)
 
 # Enable parallel computing
 cl <- makePSOCKcluster(4)
 registerDoParallel(cl)
 
 # Loading dataset(s)
-current_path = getActiveDocumentContext()$path
-setwd(dirname(current_path))
+#current_path = getActiveDocumentContext()$path
+setwd("C:/Users/Paul/Desktop/Ubiqum/Module 2/2.3 Multiple Regression/Git/Profitability")
 
 ExistProd   <- read.csv("existingproductattributes2017.csv")
 NewProd     <- read.csv("newproductattributes2017.csv")
 NewProd_Raw <- read.csv("newproductattributes2017.csv")
 ```
+<a name="Data Exploration and preprocessing"></a>  
+  
 ## 1.DATA EXPLORATION AND PREPROCESSING
 ## 1.1.Dealing with repeated products
 ```{r}
@@ -98,12 +139,12 @@ NewProd  <- dplyr::select(NewProd,-c(ProductNum,BestSellersRank,ShippingWeight,P
             #NewProd    <- NewProd[,-c(2,12:16)]
 ```
 ## 1.3.Checking for outliers
-```{r}
+```{r warning=FALSE}
 #We find lots of outliers in almost all columns. If we remove them, it will drastically change our dataset (already very small), and so we don't remove all of them.
-ggplot(stack(ExistProd), aes(x=ind, y=values)) +geom_boxplot()
+ggplot(stack(ExistProd), aes(x=ind, y=values)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 #But we should look more in depth at least in the outliers of the dependent column
-ggplot(ExistProd, aes(x=ProductType, y=Volume)) +geom_boxplot()
+ggplot(ExistProd, aes(x=ProductType, y=Volume)) +geom_boxplot() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 #We have few outliers here as well. The R Built-in function will tell us the values.
 boxplot(ExistProd$Volume, plot = FALSE)$out
@@ -118,6 +159,8 @@ for (i in c(2:11)){ExistProd[,i] <- scale(ExistProd[,i])}
 #We do the same in NewProd df
 for (i in c(2:11)){NewProd[,i] <- scale(NewProd[,i])}
 ```
+<a name="Feature Engineering"></a>  
+  
 ## 2. FEATURE ENGINEERING
 ## 2.1.Dealing with non-numeric features (Dummifying)
 ```{r}
@@ -150,11 +193,11 @@ ctrl     <- trainControl(method = "cv", number = 10)
 
 
 mRF  <- randomForest(Volume ~., ExistProd2, ntree = 80)
-plot (mRF, main = "asd")
+plot (mRF, main = "Performance of RF depending on the number of trees")
 ctrl <- trainControl(method="repeatedcv",repeats = 3, number = 5) #,classProbs=TRUE,summaryFunction = twoClassSummary)
 mRF2 <- caret::train(Volume ~ ., data = training, method = "rf", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 2)
 
-varImpPlot(mRF)
+varImpPlot(mRF, main = "Performance of RF depending on the number of trees")
 
 #As a conclusion, we get rid of Product Type
 ExistProd$ProductType <- NULL
@@ -175,8 +218,10 @@ ExistProd <- ExistProd[, - which(names(ExistProd) %in% CorNames)]
 #ExistProd[ ,c(2,4,5)] <- list(NULL)
 #NewProd[ ,c(2,4,5)]   <- list(NULL)
 ```
-## 3. Predictive Models
-```{r}
+<a name="Modelling"></a>  
+  
+## 3. Modelling 
+```{r warning=FALSE}
 set.seed(107)
 
 inTrain  <- createDataPartition(ExistProd2$Volume,p = 0.75, list = FALSE)
@@ -215,6 +260,8 @@ methods
 colnames(compare.model) <- Five_Models
 compare.model
 ```
+<a name="Analyzing and Plotting Errors"></a>  
+  
 ## 4.Analyzing and plotting errors
 ```{r}
 compare.model.melt <- melt(compare.model, varnames = c("metric", "model"))
@@ -229,6 +276,8 @@ for(i in c("RMSE","Rsquared","MAE")) {
   print(gg + geom_bar(stat = "identity") + ggtitle(i))
 }
 ```
+<a name="Final Predictions"></a>  
+  
 ## 5.Final Predictions
 ```{r}
 predictions_svm <- predict(methods$svmLinear, NewProd2)
@@ -243,7 +292,8 @@ Prod_Sales_Pred                 <- Prod_Sales_Pred[-c(10:11,16:24),]
 Prod_Sales_Pred$ProductNum <- mgsub(x = Prod_Sales_Pred$ProductNum,pattern = c(171,172,173,175,176,178,180,181,183,193,194,195,196), replacement = c("Dell1","Dell2","Apple","Toshiba","Razer","hp","Acer","Asus","Samsung1","Motorola1","Samsung2","HTC","Motorola2"))
 
 #We can observe how sales vary among the different products
-ggplot(Prod_Sales_Pred, aes(x=ProductNum,y=predictions_svm, fill=ProductType)) +geom_col()
+ggplot(Prod_Sales_Pred, aes(x=ProductNum,y=predictions_svm, fill=ProductType)) + geom_col() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ```{r}
